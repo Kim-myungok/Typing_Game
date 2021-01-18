@@ -1,51 +1,85 @@
-import pygame,time
-
-pygame.init()
-
-# WHITE= (255,255,255)
-# BLACK = (0,0,0)
-# black2 = (30,30,30)
-
-# 화면 크기, 타이틀 설정
-WIDTH = 480
-HEIGHT = 480
-screen= pygame.display.set_mode((WIDTH, HEIGHT))
-
-clock = pygame.time.Clock()
-
-pygame.display.set_caption("타이핑 게임")
-pygame.mouse.set_visible(1)
-background = pygame.Surface(screen.get_size())
-background = background.convert()
-background.fill((250,250,250))
-screen.blit(background, (0,0))
-pygame.display.flip()
+# from tkinter import 
+# root=Tk()
+# root.geometry("360x200")
 
 
-# 타이틀
-background = pygame.image.load("C:/OSS_python/midTerm_typingGame/image/wall.jpg")
-image_title = pygame.image.load('C:/OSS_python/midTerm_typingGame/image/title.png')
-screen.blit(image_title,(15,HEIGHT/4))
-
-# 버튼
-start_button = pygame.image.load('C:/OSS_python/midTerm_typingGame/image/Start_button.png').convert_alpha()
-screen.blit(start_button,(WIDTH/3,250))
-data_button = pygame.image.load('C:/OSS_python/midTerm_typingGame/image/Data_button.png').convert_alpha()
-screen.blit(data_button,(WIDTH/3+5,300))
-exit_button = pygame.image.load('C:/OSS_python/midTerm_typingGame/image/exit_button.png').convert_alpha()
-screen.blit(exit_button,(WIDTH/3+10,350))
-pygame.display.flip()
+try:
+    import Tkinter as tk
+except:
+    import tkinter as tk
 
 
-start_button = start_button.get_rect()
+class SampleApp(tk.Tk):
+    def __init__(self):
+        tk.Tk.__init__(self)
+        self._frame = None
+        self.switch_frame(Title)
+
+    def switch_frame(self, frame_class):
+        new_frame = frame_class(self)
+        if self._frame is not None:
+            self._frame.destroy()
+        self._frame = new_frame
+        self._frame.pack()
+
+class Title(tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        tk.Label(self, text="\n", font=('Helvetica', 25, "bold")).pack(side="top", fill="x", pady=5)
+        tk.Label(self, text="=== Typing_Game ===", font=('Helvetica', 25, "bold")).pack(side="top", fill="x", pady=5)
+        tk.Label(self, text="\n", font=('Helvetica', 25, "bold")).pack(side="top", fill="x", pady=5)
+        tk.Button(self, text="게임 시작", font=('Helvetica', 13), height=2, width=20, 
+                  command=lambda: master.switch_frame(Title_name)).pack()
+        tk.Button(self, text="플레이 데이터", font=('Helvetica', 13), height=2, width=20,
+                  command=lambda: master.switch_frame(PageTwo)).pack()
+        tk.Label(self, text="\n", font=('Helvetica', 25, "bold")).pack(side="top", fill="x", pady=5)
+        tk.Button(self, text="게임 종료",
+                  command=lambda: exit()).pack()
+
+class Title_name(tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        # tk.Frame.configure(self,bg='blue')
+        tk.Label(self, text="Game Start", font=('Helvetica', 18, "bold")).pack(side="top", fill="x", pady=5)
+        tk.Button(self, text="< 다음 >",
+                  command=lambda: master.switch_frame(Game_Start)) .pack()
+        tk.Button(self, text="..게임 종료..",
+                  command=lambda: exit()).pack()
+
+class Game_Start(tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        tk.Frame.configure(self,bg='red')
+        tk.Label(self, text="Page two", font=('Helvetica', 18, "bold")).pack(side="top", fill="x", pady=5)
+        tk.Button(self, text="Go back to start page",
+                  command=lambda: master.switch_frame(Title)).pack()
+
+class PageTwo(tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        tk.Frame.configure(self,bg='red')
+        tk.Label(self, text="Page two", font=('Helvetica', 18, "bold")).pack(side="top", fill="x", pady=5)
+        tk.Button(self, text="Go back to start page",
+                  command=lambda: master.switch_frame(Title)).pack()
+
+if __name__ == "__main__":
+    root = SampleApp()
+    root.geometry("480x480")
+    root.title("Typing_Game")
+    
+    root.mainloop()
+    
+# def getTextInput():
+#     result=textExample.get(1.0, END+"-1c")
+#     print(result)
+
+# text=Text(root, height=10)
+# textExample.pack()
+# Button(root, height=1, width=10, text="입력", 
+#                     command=getTextInput)
 
 
-while True:
-        for event in pygame.event.get():
-            if event.type == pygame.mouse.get_pressed():
-                ## if mouse is pressed get position of cursor ##
-                pos = pygame.mouse.get_pos()
-                ## check if cursor is on button ##
-                if button.collidepoint(pos):
-                    ## exit ##
-                    exit()
+
+# root.mainloop()
+
+
