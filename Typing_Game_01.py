@@ -6,7 +6,9 @@ import os
 import time
 import sqlite3
 import winsound
-
+#from Typing_DB import treeViewInit
+import tkinter
+from tkinter.ttk import Button
 
 class Word:
     def __init__(self, word,x,y):
@@ -52,8 +54,9 @@ cursor = conn.cursor()
 #테이블 생성
 cursor.execute("CREATE TABLE IF NOT EXISTS records(Nickname tex,\
     Score INTEGER, Regdate tex)")
-
-
+#table select
+cursor.execute("select * from records")
+insert_list = cursor.fetchall()
 
 # pygame 초기화
 pygame.init()
@@ -280,7 +283,43 @@ def game_Start():
 #################################################
 def game_Data():
     # db = open("./resource/", 'r')
-    pass
+        #GUI창 생성
+    root = tkinter.Tk()
+    root.title("record")
+    root.geometry("500x280+500+300")
+    root.resizable(False, False)
+    # label 생성
+    lbl = tkinter.Label(root, text="RECORD")
+    lbl.pack()
+    #quit 버튼 생성
+    #quit_button = Button(root, text="QUIT", command= game_Title())
+    #quit_button.place(x=0, y=0)
+    #quit_button.pack()
+    #표생성
+    treeview = tkinter.ttk.Treeview(root, columns=["one", "two", "three"], displaycolumns=["one", "two", "three"])
+    treeview.pack()
+
+    #각 컬럼 설정
+    treeview.column("#0", width=100)
+    treeview.heading("#0", text="id")
+
+    treeview.column("#1", width=100, anchor="center")
+    treeview.heading("one", text="Nickname", anchor="center")
+
+    treeview.column("#2", width=100, anchor="center")
+    treeview.heading("two", text="Score", anchor="center")
+
+    treeview.column("#3", width=100, anchor="center")
+    treeview.heading("three", text="Regdate", anchor="center")
+
+    treeview.yview()
+
+    #db 데이터를 표에 삽입
+    for i in range(len(insert_list)):
+        treeview.insert('', 'end', text=i, values=insert_list[i], iid=str(i)+"번")
+
+    root.mainloop()
+    root.protocol('WM_DELETE_WINDOW', game_Title()) # 창 닫으면 game_Title 실행
 
 #### MAIN #####
 game_Title()
