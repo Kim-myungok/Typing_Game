@@ -76,7 +76,7 @@ clock = pygame.time.Clock()
 
 words = [] # 영어 단어 리스트(1000개 로드)
 try:
-    word_f = open('./midexam/word.txt','r',encoding='utf-8')
+    word_f = open('./finalExam/word.txt','r',encoding='utf-8')
     i=0 #1000 이 되면 종료
     while True:
         line=word_f.readline()
