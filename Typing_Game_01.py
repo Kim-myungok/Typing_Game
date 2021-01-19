@@ -35,7 +35,7 @@ class Life:
         self.x=x
         self.y=y
     def load(self):
-        self.img = pygame.image.load("./finalExam/life.png")
+        self.img = pygame.image.load("./image/life.png")
         self.img = pygame.transform.scale(self.img, (40, 40)) #이미지 사이즈 조절
         self.rect = self.img.get_rect()
         self.rect.x = self.x
@@ -60,8 +60,8 @@ pygame.init()
 
 
 # 스크린 전체 크기 지정
-SCREEN_WIDTH = 480
-SCREEN_HEIGHT  = 480
+SCREEN_WIDTH = 400
+SCREEN_HEIGHT  = 500
 
 # 스크린 객체 저장
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -115,7 +115,7 @@ def game_Title():
 
     # background = pygame.image.load("C:/OSS_python/midTerm_typingGame/image/wall.jpg")
     image_title = pygame.image.load('./image/title.png')
-    SCREEN.blit(image_title,(15,SCREEN_HEIGHT/4))
+    SCREEN.blit(image_title,(0,SCREEN_HEIGHT/4))
 
     # 버튼
     global start_button, data_button, exit_button
@@ -137,16 +137,22 @@ def game_Title():
                 ## if mouse is pressed get position of cursor ##
                 pos = pygame.mouse.get_pos()
                 ## check if cursor is on button ##
-                if start_button.collidepoint(pos):
-                    ## start ##
-                    game_Start()
-                    pygame.display.flip()
-                elif data_button.collidepoint(pos):
-                    ## data ##
-                    game_Data()
-                elif exit_button.collidepoint(pos):
-                    ## exit ##
-                    playing = False
+                try:
+                    if start_button.collidepoint(pos):
+                        ## start ##
+                        game_Start()
+                        playing = False
+                        # pygame.display.flip()
+                    elif data_button.collidepoint(pos):
+                        ## data ##
+                        game_Data()
+                        playing = False
+                    elif exit_button.collidepoint(pos):
+                        ## exit ##
+                        exit()
+                except IndexError:
+                    pass
+    
                     
 #################################################
 #                  game_start():                #
@@ -154,7 +160,7 @@ def game_Title():
 def game_Start():
     words = [] # 영어 단어 리스트(1000개 로드)
     try:
-        word_f = open('./finalExam/word.txt','r',encoding='utf-8')
+        word_f = open('./resource/word.txt','r',encoding='utf-8')
         i=0 #1000 이 되면 종료
         while True:
             line=word_f.readline()
@@ -198,7 +204,7 @@ def game_Start():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 playing = False
-                pygame.quit()
+                game_Title()
             #사용자 입력 처리(텍스트 입력)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE: #백스페이스
@@ -242,6 +248,7 @@ def game_Start():
                 lifes.pop()
                 if len(lifes) == 0:
                     print("Game Over")
+                    game_Title()
                     #pygame.quit() 게임 오버 업데이트하기 이렇게 하지말고 playing=False로 만들어서 루프 탈출 후 거기서 SCREEN그리기
         SCREEN.blit(user_input,user_input_box) #입력창 화면에 그리기
 
@@ -268,7 +275,6 @@ def game_Start():
     # ## 수행 시간 출력
     # print_screen = words.render(("\t플레이 시간 :", et, "초\n", "\t점수 : {}".format(score)), True, BLACK)
     # SCREEN.blit(print_screen, [10, SCREEN_HEIGHT-SCREEN_HEIGHT/3])
-
 #################################################
 #                  game_data():                 #
 #################################################
