@@ -6,9 +6,11 @@ import os
 import time
 import sqlite3
 import winsound
-#from Typing_DB import treeViewInit
+import datetime
+from time import sleep
 import tkinter
 from tkinter.ttk import Button
+
 
 class Word:
     def __init__(self, word,x,y):
@@ -61,7 +63,6 @@ insert_list = cursor.fetchall()
 # pygame 초기화
 pygame.init()
 
-
 # 스크린 전체 크기 지정
 SCREEN_WIDTH = 400
 SCREEN_HEIGHT  = 500
@@ -107,8 +108,7 @@ def sound(sound_f, vol, playtime):
 #                  game_title():                #
 #################################################
 def game_Title():
-    # 배경 사운드
-    sound('./sound/openning.mid', 0.1, -1)
+    sound('./sound/openning.mid', 0.1, -1)  # 배경 사운드
     pygame.mouse.set_visible(1)
     background = pygame.Surface(SCREEN.get_size())
     background = background.convert()
@@ -125,8 +125,6 @@ def game_Title():
     start_image = pygame.image.load('./image/Start_button.png').convert_alpha()
     data_image = pygame.image.load('./image/Data_button.png').convert_alpha()
     exit_image = pygame.image.load('./image/exit_button.png').convert_alpha()
-
-
     start_button = SCREEN.blit(start_image,(SCREEN_WIDTH/3,250))
     data_button = SCREEN.blit(data_image,(SCREEN_WIDTH/3+5,300))
     exit_button = SCREEN.blit(exit_image,(SCREEN_WIDTH/3+10,350))
@@ -135,26 +133,24 @@ def game_Title():
     playing = True
     while playing:
         for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 winsound.PlaySound('./sound/button.wav', winsound.SND_FILENAME)
                 ## if mouse is pressed get position of cursor ##
                 pos = pygame.mouse.get_pos()
                 ## check if cursor is on button ##
-                try:
-                    if start_button.collidepoint(pos):
-                        ## start ##
-                        game_Start()
-                        playing = False
-                        # pygame.display.flip()
-                    elif data_button.collidepoint(pos):
-                        ## data ##
-                        game_Data()
-                        playing = False
-                    elif exit_button.collidepoint(pos):
-                        ## exit ##
-                        exit()
-                except IndexError:
-                    pass
+                if start_button.collidepoint(pos):
+                    ## start ##
+                    game_Start()
+                    # pygame.display.flip()
+                elif data_button.collidepoint(pos):
+                    ## data ##
+                    game_Data()
+                elif exit_button.collidepoint(pos):
+                    ## exit ##
+                    sys.exit()
+                
     
                     
 #################################################
@@ -200,16 +196,19 @@ def game_Start():
     interval_time=2 #2초 주기
     words_index=0 #0~words 끝까지 interval_time 시간마다 1씩 증가하면서 screen_in_texts에 words를 넣는다.
     screen_in_texts=[] #화면 안에 있는 텍스트
+    
+    # Start Time
+    start = time.time()
 
     playing = True
     while playing:
         # 이벤트 처리
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                playing = False
                 game_Title()
             #사용자 입력 처리(텍스트 입력)
             if event.type == pygame.KEYDOWN:
+                winsound.PlaySound('./sound/button.wav', winsound.SND_FILENAME)
                 if event.key == pygame.K_BACKSPACE: #백스페이스
                     if len(user_input_text)> 0:
                         user_input_text = user_input_text[:-1]
@@ -250,8 +249,27 @@ def game_Start():
                 screen_in_texts.remove(text) 
                 lifes.pop()
                 if len(lifes) == 0:
-                    print("Game Over")
+                    SCREEN.fill((255, 255, 255))
+                    pygame.display.flip()
+                    clock.tick(FPS)
+                    pygame.display.update()
+
+                    # PRINT "GAME_OVER"
+                    font = pygame.font.Font(None, 40)
+                    text_surface = font.render("GAME_OVER", True, BLACK)
+                    text_rect = text_surface.get_rect()
+                    text_rect.center = (200, 220)
+
+                    SCREEN.blit(text_surface, text_rect)
+                    pygame.display.flip()
+                    clock.tick(FPS)
+                    pygame.display.update()
+                    
+                    sleep(2)    # sleep_time의 수 만큼 화면 멈추고 게임오버 텍스트 보여주기
+                    pygame.display.update()
                     game_Title()
+                    # 게임 플레이 결과 확인 후 플레이어가 엔터 누를 때 종료
+                    # sleep(10)
                     #pygame.quit() 게임 오버 업데이트하기 이렇게 하지말고 playing=False로 만들어서 루프 탈출 후 거기서 SCREEN그리기
         SCREEN.blit(user_input,user_input_box) #입력창 화면에 그리기
 
@@ -268,16 +286,7 @@ def game_Start():
         # FPS:24
         clock.tick(FPS)
 
-    # ## 결과 기록
-    # cursor.execute("INSERT INTO records('Nickname', 'Score', 'record', 'Regdate')\
-    #     VALUES(?,?,?,?)", (nickname, score, et, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
-    ## 접속 해제
-    conn.close()
-
-    # ## 수행 시간 출력
-    # print_screen = words.render(("\t플레이 시간 :", et, "초\n", "\t점수 : {}".format(score)), True, BLACK)
-    # SCREEN.blit(print_screen, [10, SCREEN_HEIGHT-SCREEN_HEIGHT/3])
 #################################################
 #                  game_data():                 #
 #################################################
@@ -286,7 +295,7 @@ def game_Data():
         #GUI창 생성
     root = tkinter.Tk()
     root.title("record")
-    root.geometry("500x280+500+300")
+    root.geometry("350x280+600+300")
     root.resizable(False, False)
     # label 생성
     lbl = tkinter.Label(root, text="RECORD")
@@ -300,16 +309,16 @@ def game_Data():
     treeview.pack()
 
     #각 컬럼 설정
-    treeview.column("#0", width=100)
+    treeview.column("#0", width=40)
     treeview.heading("#0", text="id")
 
-    treeview.column("#1", width=100, anchor="center")
+    treeview.column("#1", width=80, anchor="center")
     treeview.heading("one", text="Nickname", anchor="center")
 
-    treeview.column("#2", width=100, anchor="center")
+    treeview.column("#2", width=40, anchor="center")
     treeview.heading("two", text="Score", anchor="center")
 
-    treeview.column("#3", width=100, anchor="center")
+    treeview.column("#3", width=150, anchor="center")
     treeview.heading("three", text="Regdate", anchor="center")
 
     treeview.scrollable = True
