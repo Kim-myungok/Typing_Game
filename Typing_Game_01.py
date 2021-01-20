@@ -23,6 +23,7 @@ class Word:
         self.text_Title=myFont.render(self.word, True, BLACK)
     # y축 (위에서 아래로) 이동
     def move_y(self):
+        global TEXT_SPEED
         self.y+=TEXT_SPEED
     # 스크린에 그리기
     def draw_word(self):
@@ -94,7 +95,7 @@ RED = (255,0,0)#색상상수
 
 #게임 속성관련
 LIFE_CNT=3 #목숨 개수
-TEXT_SPEED = 5 #글자 낙하속도
+global TEXT_SPEED # = 5 #글자 낙하속도, 속도 조절위한 global선언
 FPS = 20 #1초당 프레임 수
 #단어파일 -> 리스트로 넘어온 개수
 END_OF_WORDS=0 
@@ -144,7 +145,8 @@ def game_Title():
                 ## check if cursor is on button ##
                 if start_button.collidepoint(pos):
                     ## start ##
-                    game_Start()
+                    #game_Start()
+                    game_Level()
                     # pygame.display.flip()
                 elif data_button.collidepoint(pos):
                     ## data ##
@@ -333,6 +335,60 @@ def game_Data():
 
     root.mainloop()
     root.protocol('WM_DELETE_WINDOW', game_Title()) # 창 닫으면 game_Title 실행
+
+#################################################
+#                  game_Level():                 #
+#################################################
+def game_Level():
+    pygame.mouse.set_visible(1)
+    background = pygame.Surface(SCREEN.get_size())
+    background = background.convert()
+    background.fill((250,250,250))
+    SCREEN.blit(background, (0,0))
+
+    level1 = pygame.image.load('./image/level1.png')
+    level2 = pygame.image.load('./image/level2.png')
+    level3 = pygame.image.load('./image/level3.png')
+
+    button1 = SCREEN.blit(level1,(SCREEN_WIDTH/3-10, 100))
+    button2 = SCREEN.blit(level2,(SCREEN_WIDTH/3-10, 200))
+    button3 = SCREEN.blit(level3,(SCREEN_WIDTH/3-10, 300))
+    pygame.display.flip()
+
+    global TEXT_SPEED
+    
+    sound('./sound/openning.mid', 0.1, -1)
+    playing = True
+    while playing:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                playing = False
+                game_Title()
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                winsound.PlaySound('./sound/button.wav', winsound.SND_FILENAME)
+                ## if mouse is pressed get position of cursor ##
+                pos = pygame.mouse.get_pos()
+                ## check if cursor is on button ##
+                try:
+                    if button1.collidepoint(pos):
+                        ## level1 ##
+                        TEXT_SPEED = 10
+                        game_Start()
+                        playing = False
+                        # pygame.display.flip()
+                    elif button2.collidepoint(pos):
+                        ## level2 ##
+                        TEXT_SPEED = 30
+                        game_Start()
+                        playing = False
+                    elif button3.collidepoint(pos):
+                        ## level3 ##
+                        TEXT_SPEED = 50
+                        game_Start()
+                        playing = False
+                except IndexError:
+                    pass
+
 
 #### MAIN #####
 game_Title()
