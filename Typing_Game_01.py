@@ -312,7 +312,8 @@ def game_Data():
     treeview.column("#3", width=100, anchor="center")
     treeview.heading("three", text="Regdate", anchor="center")
 
-    treeview.yview()
+    treeview.scrollable = True
+
 
     #db 데이터를 표에 삽입
     for i in range(len(insert_list)):
