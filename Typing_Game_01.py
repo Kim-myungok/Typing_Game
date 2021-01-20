@@ -48,19 +48,6 @@ class Life:
     def draw(self):
         SCREEN.blit(self.img, [self.rect.x, self.rect.y])
 
-#DB 생성
-conn = sqlite3.connect('./resource/records.db', isolation_level=None)
-
-#cursor 연결
-cursor = conn.cursor()
-
-#테이블 생성
-cursor.execute("CREATE TABLE IF NOT EXISTS records(Nickname tex,\
-    Score INTEGER, Regdate tex)")
-#table select
-cursor.execute("select * from records")
-insert_list = cursor.fetchall()
-
 # pygame 초기화
 pygame.init()
 
@@ -144,7 +131,6 @@ def game_Title():
                 pos = pygame.mouse.get_pos()
                 ## check if cursor is on button ##
                 if start_button.collidepoint(pos):
-                    ## start ##
                     #game_Start()
                     game_Level()
                     # pygame.display.flip()
@@ -154,187 +140,6 @@ def game_Title():
                 elif exit_button.collidepoint(pos):
                     ## exit ##
                     sys.exit()
-                
-    
-                    
-#################################################
-#                  game_start():                #
-#################################################
-def game_Start():
-    words = [] # 영어 단어 리스트(1000개 로드)
-    try:
-        word_f = open('./resource/word.txt','r',encoding='utf-8')
-        i=0 #1000 이 되면 종료
-        while True:
-            line=word_f.readline()
-            if not line or i==1000:
-                END_OF_WORDS = i
-                break
-            words.append(Word(line.strip(),randint(0,ANS_TEXT_X),ANS_TEXT_Y))
-            i+=1
-    except IOError:
-        print("파일이 없습니다!! 게임을 진행할 수 없습니다!!")
-
-    if words==[]:
-        sys.exit()
-
-    # Text Editing (user input)
-    user_input_text = ''
-    user_input_text_font = pygame.font.SysFont("arial", 30, True, False)
-    user_input = user_input_text_font.render(user_input_text,True,BLACK)
-    user_input_box = user_input.get_rect()
-    user_input_box.topleft = (INPUT_BOX_X,INPUT_BOX_Y)
-    cursor1 = pygame.Rect(user_input_box.topright,(3,user_input_box.height))
-
-    # Life
-    lifes = []
-    for i in range(LIFE_CNT):
-        life = Life(LIFE_X_FIX+i*LIFE_X_WEIGHT,LIFE_Y_FIX)
-        life.load()
-        lifes.append(life)
-    #score
-    score = 0
-
-    # TIME & TEXT
-    current_time = 0
-    interval_time=2 #2초 주기
-    words_index=0 #0~words 끝까지 interval_time 시간마다 1씩 증가하면서 screen_in_texts에 words를 넣는다.
-    screen_in_texts=[] #화면 안에 있는 텍스트
-    
-    # Start Time
-    start = time.time()
-
-    playing = True
-    while playing:
-        # 이벤트 처리
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit
-            #사용자 입력 처리(텍스트 입력)
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_BACKSPACE: #백스페이스
-                    if len(user_input_text)> 0:
-                        user_input_text = user_input_text[:-1]
-                elif event.key == pygame.K_RETURN: #엔터
-                    for text in screen_in_texts:
-                        if user_input_text == text.word:
-                            score += len(text.word)
-                            screen_in_texts.remove(text) 
-                    user_input_text=""
-                else: #글자
-                    user_input_text += event.unicode
-                user_input = user_input_text_font.render(user_input_text,True,BLACK)
-                user_input_box.size = user_input.get_size()
-                cursor1.topleft = user_input_box.topright
-
-        # 스크린 배경색 칠하기
-        SCREEN.fill((255, 255, 255))
-        pygame.draw.rect(SCREEN, BLACK, [0,455,400,45],2)
-
-        #점수판 생성
-        score_font = pygame.font.SysFont("arial",20, True, False)
-        score_board = score_font.render(str(score),True,BLACK)
-        score_rect = score_board.get_rect()
-        score_rect.x=LIFE_X_FIX+LIFE_X_WEIGHT+25
-        score_rect.y=round(SCREEN_HEIGHT/2)
-        SCREEN.blit(score_board,score_rect)
-
-        # 텍스트 위에서 아래로
-        mt = clock.tick(FPS) / 1000
-        current_time += mt 
-        if current_time > interval_time and END_OF_WORDS > words_index: #2초 주기
-            screen_in_texts.append(words[words_index]) # interval_time 시간마다 1씩 증가하면서 screen_in_texts에 words를 넣는다.
-            words_index+=1 #0~words 끝까지
-            current_time = 0
-        #실제로 텍스트 위에서 아래로 내리는 코드
-        for text in screen_in_texts: 
-            text.draw_word()
-            text.move_y() 
-            if text.is_screen_out(): #텍스트가 내려가다가 설정한 밑바닥에 닿으면 목숨 - 1
-                screen_in_texts.remove(text) 
-                lifes.pop()
-                # 게임 종료되었을때 GAME_OVER 화면에 출력
-                if len(lifes) == 0:
-                    SCREEN.fill(GRAY)
-                    pygame.display.flip()
-                    clock.tick(FPS)
-                    pygame.display.update()
-                    # PRINT "GAME_OVER"
-                    
-                    font = pygame.font.Font(None, 40)
-                    text_surface = font.render("GAME_OVER", True, WHITE)
-                    text_rect = text_surface.get_rect()
-                    text_rect.center = (200, 150)
-
-                    SCREEN.blit(text_surface, text_rect)
-                    pygame.display.flip()
-                    clock.tick(FPS)
-                    pygame.display.update()
-                    
-                    sleep(2)
-                    pygame.display.update()
-                    game_Title()
-                    # 게임 플레이 결과 확인 후 플레이어가 엔터 누를 때 종료
-                    # sleep(10)
-        SCREEN.blit(user_input,user_input_box) #입력창 화면에 그리기
-
-        if time.time() % 1 > 0.5: #커서 깜빡임
-            pygame.draw.rect(SCREEN, RED, cursor1)
-
-        #목숨(하트) 화면에 그리기
-        for life in lifes:
-            life.draw()
-        
-        # 작업한 스크린의 내용을 갱신하기
-        pygame.display.flip()
-
-        # FPS:24
-        clock.tick(FPS)
-
-
-#################################################
-#                  game_data():                 #
-#################################################
-def game_Data():
-    # db = open("./resource/", 'r')
-        #GUI창 생성
-    root = tkinter.Tk()
-    root.title("record")
-    root.geometry("500x280+500+300")
-    root.resizable(False, False)
-    # label 생성
-    lbl = tkinter.Label(root, text="RECORD")
-    lbl.pack()
-    #quit 버튼 생성
-    #quit_button = Button(root, text="QUIT", command= game_Title())
-    #quit_button.place(x=0, y=0)
-    #quit_button.pack()
-    #표생성
-    treeview = tkinter.ttk.Treeview(root, columns=["one", "two", "three"], displaycolumns=["one", "two", "three"])
-    treeview.pack()
-
-    #각 컬럼 설정
-    treeview.column("#0", width=100)
-    treeview.heading("#0", text="id")
-
-    treeview.column("#1", width=100, anchor="center")
-    treeview.heading("one", text="Nickname", anchor="center")
-
-    treeview.column("#2", width=100, anchor="center")
-    treeview.heading("two", text="Score", anchor="center")
-
-    treeview.column("#3", width=100, anchor="center")
-    treeview.heading("three", text="Regdate", anchor="center")
-
-    treeview.scrollable = True
-
-
-    #db 데이터를 표에 삽입
-    for i in range(len(insert_list)):
-        treeview.insert('', 'end', text=i, values=insert_list[i], iid=str(i)+"번")
-
-    root.mainloop()
-    root.protocol('WM_DELETE_WINDOW', game_Title()) # 창 닫으면 game_Title 실행
 
 #################################################
 #                  game_Level():                 #
@@ -388,7 +193,223 @@ def game_Level():
                         playing = False
                 except IndexError:
                     pass
+                
+                    
+#################################################
+#                  game_start():                #
+#################################################
+def game_Start():
+    #DB 생성
+    conn = sqlite3.connect('./resource/records.db', isolation_level=None)
 
+    #cursor 연결
+    cursor = conn.cursor()
+
+    #테이블 생성
+    cursor.execute("CREATE TABLE IF NOT EXISTS records(\
+        Score INTEGER, Record tex, Regdate tex)")
+    #table select
+    cursor.execute("select * from records")
+    insert_list = cursor.fetchall()
+    
+    words = [] # 영어 단어 리스트(1000개 로드)
+    try:
+        word_f = open('./resource/word.txt','r',encoding='utf-8')
+        i=0 #1000 이 되면 종료
+        while True:
+            line=word_f.readline()
+            if not line or i==1000:
+                END_OF_WORDS = i
+                break
+            words.append(Word(line.strip(),randint(0,ANS_TEXT_X),ANS_TEXT_Y))
+            i+=1
+    except IOError:
+        print("파일이 없습니다!! 게임을 진행할 수 없습니다!!")
+
+    if words==[]:
+        sys.exit()
+
+    # Text Editing (user input)
+    user_input_text = ''
+    user_input_text_font = pygame.font.SysFont("arial", 30, True, False)
+    user_input = user_input_text_font.render(user_input_text,True,BLACK)
+    user_input_box = user_input.get_rect()
+    user_input_box.topleft = (INPUT_BOX_X,INPUT_BOX_Y)
+    cursor1 = pygame.Rect(user_input_box.topright,(3,user_input_box.height))
+
+    # Life
+    lifes = []
+    for i in range(LIFE_CNT):
+        life = Life(LIFE_X_FIX+i*LIFE_X_WEIGHT,LIFE_Y_FIX)
+        life.load()
+        lifes.append(life)
+    #score
+    score = 0
+
+    # TIME & TEXT
+    current_time = 0
+    interval_time=2 #2초 주기
+    words_index=0 #0~words 끝까지 interval_time 시간마다 1씩 증가하면서 screen_in_texts에 words를 넣는다.
+    screen_in_texts=[] #화면 안에 있는 텍스트
+    
+    # Start Time
+    start = time.time()
+
+    playing = True
+    while playing:
+        # 이벤트 처리
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit
+            #사용자 입력 처리(텍스트 입력)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE: #백스페이스
+                    if len(user_input_text)> 0:
+                        user_input_text = user_input_text[:-1]
+                elif event.key == pygame.K_RETURN: #엔터
+                    for text in screen_in_texts:
+                        if user_input_text == text.word:
+                            score += len(text.word)
+                            screen_in_texts.remove(text) 
+                    user_input_text=""
+                else: #글자
+                    user_input_text += event.unicode
+                user_input = user_input_text_font.render(user_input_text,True,BLACK)
+                user_input_box.size = user_input.get_size()
+                cursor1.topleft = user_input_box.topright
+
+        # 스크린 배경색 칠하기
+        SCREEN.fill((255, 255, 255))
+        pygame.draw.rect(SCREEN, BLACK, [0,455,400,45],2)
+
+        #점수판 생성
+        score_font = pygame.font.SysFont("arial",20, True, False)
+        score_board = score_font.render(str(score),True,BLACK)
+        score_rect = score_board.get_rect()
+        score_rect.x=LIFE_X_FIX+LIFE_X_WEIGHT+25
+        score_rect.y=round(SCREEN_HEIGHT/2)
+        SCREEN.blit(score_board,score_rect)
+
+        # 텍스트 위에서 아래로
+        mt = clock.tick(FPS) / 1000
+        current_time += mt 
+        if current_time > interval_time and END_OF_WORDS > words_index: #2초 주기
+            screen_in_texts.append(words[words_index]) # interval_time 시간마다 1씩 증가하면서 screen_in_texts에 words를 넣는다.
+            words_index+=1 #0~words 끝까지
+            current_time = 0
+        #실제로 텍스트 위에서 아래로 내리는 코드
+        for text in screen_in_texts: 
+            text.draw_word()
+            text.move_y() 
+            if text.is_screen_out(): #텍스트가 내려가다가 설정한 밑바닥에 닿으면 목숨 - 1
+                screen_in_texts.remove(text) 
+                lifes.pop()
+                # 게임 종료되었을때 GAME_OVER 화면에 출력
+                if len(lifes) == 0:
+                    end = time.time()       # End Time
+                    et = end - start        # 총 게임 시간
+                    et = format(et, ".3f")  # 소수 셋째 자리 출력(시간)
+
+                    SCREEN.fill(GRAY)
+                    pygame.display.flip()
+                    clock.tick(FPS)
+                    pygame.display.update()
+
+                    # PRINT "GAME_OVER"
+                    font = pygame.font.Font(None, 40)
+                    text_surface = font.render("GAME_OVER", True, WHITE)
+                    text_rect = text_surface.get_rect()
+                    text_rect.center = (200, 150)
+
+                    SCREEN.blit(text_surface, text_rect)
+                    pygame.display.flip()
+                    clock.tick(FPS)
+                    pygame.display.update()
+                    
+                    ## 결과 기록
+                    cursor.execute("INSERT INTO records('Score', 'Record', 'Regdate')\
+                        VALUES(?,?,?)", (score, et, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+
+                    ## 접속 해제
+                    conn.close()
+
+                    sleep(2)
+                    pygame.display.update()
+                    game_Title()
+                    # 게임 플레이 결과 확인 후 플레이어가 엔터 누를 때 종료
+                    # sleep(10)
+        SCREEN.blit(user_input,user_input_box) #입력창 화면에 그리기
+
+        if time.time() % 1 > 0.5: #커서 깜빡임
+            pygame.draw.rect(SCREEN, RED, cursor1)
+
+        #목숨(하트) 화면에 그리기
+        for life in lifes:
+            life.draw()
+        
+        # 작업한 스크린의 내용을 갱신하기
+        pygame.display.flip()
+
+        # FPS:24
+        clock.tick(FPS)
+
+
+#################################################
+#                  game_data():                 #
+#################################################
+def game_Data():
+    #DB 생성
+    conn = sqlite3.connect('./resource/records.db', isolation_level=None)
+
+    #cursor 연결
+    cursor = conn.cursor()
+
+    #테이블 생성
+    cursor.execute("CREATE TABLE IF NOT EXISTS records(\
+        Score INTEGER, Record tex, Regdate tex)")
+    #table select
+    cursor.execute("select * from records")
+    insert_list = cursor.fetchall()
+
+    # db = open("./resource/", 'r')
+        #GUI창 생성
+    root = tkinter.Tk()
+    root.title("record")
+    root.geometry("350x270+585+220")
+    root.resizable(False, False)
+    # label 생성
+    lbl = tkinter.Label(root, text="RECORD")
+    lbl.pack()
+    #quit 버튼 생성
+    #quit_button = Button(root, text="QUIT", command= game_Title())
+    #quit_button.place(x=0, y=0)
+    #quit_button.pack()
+    #표생성
+    treeview = tkinter.ttk.Treeview(root, columns=["one", "two", "three"], displaycolumns=["one", "two", "three"])
+    treeview.pack()
+
+    #각 컬럼 설정
+    treeview.column("#0", width=50, anchor="center")
+    treeview.heading("#0", text="ID")
+
+    treeview.column("#1", width=50, anchor="center")
+    treeview.heading("one", text="SCORE", anchor="center")
+
+    treeview.column("#2", width=60, anchor="center")
+    treeview.heading("two", text="RECORD", anchor="center")
+
+    treeview.column("#3", width=150, anchor="center")
+    treeview.heading("three", text="REGDATE", anchor="center")
+
+    treeview.scrollable = True
+
+
+    #db 데이터를 표에 삽입
+    for i in range(len(insert_list)):
+        treeview.insert('', 'end', text=i, values=insert_list[i], iid=str(i)+"번")
+
+    root.mainloop()
+    root.protocol('WM_DELETE_WINDOW', game_Title()) # 창 닫으면 game_Title 실행
 
 #### MAIN #####
 game_Title()
