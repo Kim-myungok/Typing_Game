@@ -88,12 +88,14 @@ LIFE_Y_FIX=0
 
 # 상수
 BLACK = (0, 0, 0) #색상상수
+GRAY = (150, 150, 150)
+WHITE = (255, 255, 255) #색상상수
 RED = (255,0,0)#색상상수
 
 #게임 속성관련
 LIFE_CNT=3 #목숨 개수
-TEXT_SPEED = 15 #글자 낙하속도
-FPS = 24 #1초당 프레임 수
+TEXT_SPEED = 5 #글자 낙하속도
+FPS = 20 #1초당 프레임 수
 #단어파일 -> 리스트로 넘어온 개수
 END_OF_WORDS=0 
 
@@ -205,10 +207,9 @@ def game_Start():
         # 이벤트 처리
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                game_Title()
+                sys.exit
             #사용자 입력 처리(텍스트 입력)
             if event.type == pygame.KEYDOWN:
-                winsound.PlaySound('./sound/button.wav', winsound.SND_FILENAME)
                 if event.key == pygame.K_BACKSPACE: #백스페이스
                     if len(user_input_text)> 0:
                         user_input_text = user_input_text[:-1]
@@ -226,6 +227,8 @@ def game_Start():
 
         # 스크린 배경색 칠하기
         SCREEN.fill((255, 255, 255))
+        pygame.draw.rect(SCREEN, BLACK, [0,455,400,45],2)
+
         #점수판 생성
         score_font = pygame.font.SysFont("arial",20, True, False)
         score_board = score_font.render(str(score),True,BLACK)
@@ -248,29 +251,29 @@ def game_Start():
             if text.is_screen_out(): #텍스트가 내려가다가 설정한 밑바닥에 닿으면 목숨 - 1
                 screen_in_texts.remove(text) 
                 lifes.pop()
+                # 게임 종료되었을때 GAME_OVER 화면에 출력
                 if len(lifes) == 0:
-                    SCREEN.fill((255, 255, 255))
+                    SCREEN.fill(GRAY)
                     pygame.display.flip()
                     clock.tick(FPS)
                     pygame.display.update()
-
                     # PRINT "GAME_OVER"
+                    
                     font = pygame.font.Font(None, 40)
-                    text_surface = font.render("GAME_OVER", True, BLACK)
+                    text_surface = font.render("GAME_OVER", True, WHITE)
                     text_rect = text_surface.get_rect()
-                    text_rect.center = (200, 220)
+                    text_rect.center = (200, 150)
 
                     SCREEN.blit(text_surface, text_rect)
                     pygame.display.flip()
                     clock.tick(FPS)
                     pygame.display.update()
                     
-                    sleep(2)    # sleep_time의 수 만큼 화면 멈추고 게임오버 텍스트 보여주기
+                    sleep(2)
                     pygame.display.update()
                     game_Title()
                     # 게임 플레이 결과 확인 후 플레이어가 엔터 누를 때 종료
                     # sleep(10)
-                    #pygame.quit() 게임 오버 업데이트하기 이렇게 하지말고 playing=False로 만들어서 루프 탈출 후 거기서 SCREEN그리기
         SCREEN.blit(user_input,user_input_box) #입력창 화면에 그리기
 
         if time.time() % 1 > 0.5: #커서 깜빡임
@@ -295,7 +298,7 @@ def game_Data():
         #GUI창 생성
     root = tkinter.Tk()
     root.title("record")
-    root.geometry("350x280+600+300")
+    root.geometry("500x280+500+300")
     root.resizable(False, False)
     # label 생성
     lbl = tkinter.Label(root, text="RECORD")
@@ -309,16 +312,16 @@ def game_Data():
     treeview.pack()
 
     #각 컬럼 설정
-    treeview.column("#0", width=40)
+    treeview.column("#0", width=100)
     treeview.heading("#0", text="id")
 
-    treeview.column("#1", width=80, anchor="center")
+    treeview.column("#1", width=100, anchor="center")
     treeview.heading("one", text="Nickname", anchor="center")
 
-    treeview.column("#2", width=40, anchor="center")
+    treeview.column("#2", width=100, anchor="center")
     treeview.heading("two", text="Score", anchor="center")
 
-    treeview.column("#3", width=150, anchor="center")
+    treeview.column("#3", width=100, anchor="center")
     treeview.heading("three", text="Regdate", anchor="center")
 
     treeview.scrollable = True
