@@ -2,7 +2,6 @@ from datetime import datetime
 from random import *
 import pygame
 import sys
-import os
 import time
 import sqlite3
 import winsound
@@ -331,6 +330,28 @@ def game_Start():
                     text_surface = font.render("GAME_OVER", True, WHITE)
                     text_rect = text_surface.get_rect()
                     text_rect.center = (200, 150)
+                    SCREEN.blit(text_surface, text_rect)
+                    pygame.display.flip()
+                    # PRINT "Score = 점수"
+                    prints = ['Score', str(score), 'Record', str(et)]
+                    cnt = 0
+                    text_width = 200
+                    text_heith = 200
+                    for i in prints:
+                        font = pygame.font.Font(None, 30)
+                        text_surface = font.render(i, True, WHITE)
+                        text_rect = text_surface.get_rect()
+                        if cnt==1:
+                            text_width = text_width + 100
+                            cnt = 0
+                        elif cnt==0:
+                            text_heith = text_heith + 50
+                            text_width = text_width - 100
+                            cnt = cnt + 1
+                        text_rect.center = (text_width, text_heith)
+                        SCREEN.blit(text_surface, text_rect)
+                        pygame.display.flip()
+                        
 
                     SCREEN.blit(text_surface, text_rect)
                     pygame.display.flip()
@@ -339,7 +360,7 @@ def game_Start():
                     
                     ## 결과 기록
                     cursor.execute("INSERT INTO records('Score', 'Record', 'Regdate')\
-                        VALUES(?,?,?)", (score, et, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+                        VALUES(?,?,?)", (int(score), et, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
                     ## 접속 해제
                     conn.close()
