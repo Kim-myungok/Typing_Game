@@ -21,9 +21,9 @@ class Word:
         # Text를 surface에 그리기, 안티알리어싱, 검은색
         self.text_Title=myFont.render(self.word, True, BLACK)
     # y축 (위에서 아래로) 이동
-    def move_y(self):
-        global TEXT_SPEED
-        self.y+=TEXT_SPEED
+    def move_y(self,speed):
+        # global TEXT_SPEED
+        self.y+=speed
     # 스크린에 그리기
     def draw_word(self):
         SCREEN.blit(self.text_Title, [self.x, self.y])
@@ -82,6 +82,7 @@ RED = (255,0,0)#색상상수
 #게임 속성관련
 LIFE_CNT=3 #목숨 개수
 global TEXT_SPEED # = 5 #글자 낙하속도, 속도 조절위한 global선언
+global GAME_LEVEL #게임 레벨
 FPS = 20 #1초당 프레임 수
 #단어파일 -> 리스트로 넘어온 개수
 END_OF_WORDS=0 
@@ -170,6 +171,7 @@ def game_Level():
     pygame.display.flip()
 
     global TEXT_SPEED
+    global GAME_LEVEL
     
     playing = True
     while playing:
@@ -186,23 +188,25 @@ def game_Level():
                 try:
                     if button1.collidepoint(pos):
                         ## level1 ##
+                        GAME_LEVEL=1
                         TEXT_SPEED = 10
                         game_Start()
                         playing = False
                         # pygame.display.flip()
                     elif button2.collidepoint(pos):
                         ## level2 ##
-                        TEXT_SPEED = 30
+                        GAME_LEVEL=2
+                        TEXT_SPEED = 20
                         game_Start()
                         playing = False
                     elif button3.collidepoint(pos):
                         ## level3 ##
-                        TEXT_SPEED = 50
+                        GAME_LEVEL=3
                         game_Start()
                         playing = False
                 except IndexError:
                     pass
-                
+        
                     
 #################################################
 #                  game_start():                #
@@ -310,7 +314,11 @@ def game_Start():
         #실제로 텍스트 위에서 아래로 내리는 코드
         for text in screen_in_texts: 
             text.draw_word()
-            text.move_y() 
+            if GAME_LEVEL==3:
+                speed=randint(10,40)
+            else :
+                speed = TEXT_SPEED
+            text.move_y(speed) 
             if text.is_screen_out(): #텍스트가 내려가다가 설정한 밑바닥에 닿으면 목숨 - 1
                 screen_in_texts.remove(text) 
                 lifes.pop()
