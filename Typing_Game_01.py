@@ -197,13 +197,12 @@ def game_Level():
                     elif button2.collidepoint(pos):
                         ## level2 ##
                         GAME_LEVEL=2
-                        TEXT_SPEED = 30
+                        TEXT_SPEED = 20
                         game_Start()
                         playing = False
                     elif button3.collidepoint(pos):
                         ## level3 ##
                         GAME_LEVEL=3
-                        TEXT_SPEED = 50
                         game_Start()
                         playing = False
                 except IndexError:
