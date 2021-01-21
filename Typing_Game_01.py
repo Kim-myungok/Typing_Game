@@ -94,9 +94,9 @@ def sound(sound_f, vol, playtime):      #파일명, 소리크기, 재생시킬�
     pygame.mixer.music.play(playtime)
 
 #################################################
-#                  game_title():                #
+#                  gameTitle():                #
 #################################################
-def game_Title():
+def gameTitle():
     sound('./sound/openning.mid', 0.1, -1)  # 배경 사운드
     pygame.mouse.set_visible(1)
     background = pygame.Surface(SCREEN.get_size())
@@ -129,12 +129,12 @@ def game_Title():
                 pos = pygame.mouse.get_pos()
                 ## check if cursor is on button ##
                 if start_button.collidepoint(pos):
-                    #game_Start()
+                    #gameStart()
                     start_image = pygame.image.load('./image/Start_button2.png').convert_alpha()
                     start_button = SCREEN.blit(start_image,(SCREEN_WIDTH/3,250))
                     pygame.display.flip()
                     winsound.PlaySound('./sound/button.wav', winsound.SND_FILENAME)
-                    game_Level()
+                    gameLevel()
                     # pygame.display.flip()
                 elif data_button.collidepoint(pos):
                     ## data ##
@@ -142,7 +142,7 @@ def game_Title():
                     data_button = SCREEN.blit(data_image,(SCREEN_WIDTH/3+5,300))
                     pygame.display.flip()
                     winsound.PlaySound('./sound/button.wav', winsound.SND_FILENAME)
-                    game_Data()
+                    gameData()
                 elif exit_button.collidepoint(pos):
                     ## exit ##
                     exit_image = pygame.image.load('./image/exit_button2.png').convert_alpha()
@@ -152,9 +152,9 @@ def game_Title():
                     pygame.quit()
 
 #################################################
-#                  game_Level():                 #
+#                  gameLevel():                 #
 #################################################
-def game_Level():
+def gameLevel():
     pygame.mouse.set_visible(1)
     background = pygame.Surface(SCREEN.get_size())
     background = background.convert()
@@ -179,7 +179,7 @@ def game_Level():
             if event.type == pygame.QUIT:
                 winsound.PlaySound('./sound/button.wav', winsound.SND_FILENAME)
                 playing = False
-                game_Title()
+                gameTitle()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 winsound.PlaySound('./sound/button.wav', winsound.SND_FILENAME)
                 ## if mouse is pressed get position of cursor ##
@@ -190,28 +190,28 @@ def game_Level():
                         ## level1 ##
                         GAME_LEVEL=1
                         TEXT_SPEED = 10
-                        game_Start()
+                        gameStart()
                         playing = False
                         # pygame.display.flip()
                     elif button2.collidepoint(pos):
                         ## level2 ##
                         GAME_LEVEL=2
                         TEXT_SPEED = 20
-                        game_Start()
+                        gameStart()
                         playing = False
                     elif button3.collidepoint(pos):
                         ## level3 ##
                         GAME_LEVEL=3
-                        game_Start()
+                        gameStart()
                         playing = False
                 except IndexError:
                     pass
         
                     
 #################################################
-#                  game_start():                #
+#                  gameStart():                #
 #################################################
-def game_Start():
+def gameStart():
     #DB 생성
     conn = sqlite3.connect('./resource/records.db', isolation_level=None)
 
@@ -375,7 +375,7 @@ def game_Start():
 
                     sleep(2)
                     pygame.display.update()
-                    game_Title()
+                    gameTitle()
                     # 게임 플레이 결과 확인 후 플레이어가 엔터 누를 때 종료
                     # sleep(10)
         SCREEN.blit(user_input,user_input_box) #입력창 화면에 그리기
@@ -395,9 +395,9 @@ def game_Start():
 
 
 #################################################
-#                  game_data():                 #
+#                  gameData():                 #
 #################################################
-def game_Data():
+def gameData():
     #DB 생성
     conn = sqlite3.connect('./resource/records.db', isolation_level=None)
 
@@ -420,7 +420,7 @@ def game_Data():
     lbl = tkinter.Label(root, text="RECORD")
     lbl.pack()
     #quit 버튼 생성
-    #quit_button = Button(root, text="QUIT", command= game_Title())
+    #quit_button = Button(root, text="QUIT", command= gameTitle())
     #quit_button.place(x=0, y=0)
     #quit_button.pack()
     #표생성
@@ -449,11 +449,11 @@ def game_Data():
 
     root.mainloop()
     winsound.PlaySound('./sound/button.wav', winsound.SND_FILENAME)
-    root.protocol('WM_DELETE_WINDOW', game_Title()) # 창 닫으면 game_Title 실행
+    root.protocol('WM_DELETE_WINDOW', gameTitle()) # 창 닫으면 gameTitle 실행
     
     # DB 접속 해제
     conn.close()
 
 #### MAIN #####
-game_Title()
+gameTitle()
 pygame.quit()
