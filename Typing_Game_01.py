@@ -21,14 +21,14 @@ class Word:
         # Text를 surface에 그리기, 안티알리어싱, 검은색
         self.text_Title=myFont.render(self.word, True, BLACK)
     # y축 (위에서 아래로) 이동
-    def move_y(self,speed):
+    def moveY(self,speed):
         # global TEXT_SPEED
         self.y+=speed
     # 스크린에 그리기
-    def draw_word(self):
+    def draw(self):
         SCREEN.blit(self.text_Title, [self.x, self.y])
     # y축이 화면 밖으로 나갔는지 확인(text창위까지), True:화면 밖, False:화면 안
-    def is_screen_out(self):
+    def isScreenOut(self):
         if self.y > (SCREEN_HEIGHT-70):
             return True
 
@@ -313,13 +313,13 @@ def game_Start():
             current_time = 0
         #실제로 텍스트 위에서 아래로 내리는 코드
         for text in screen_in_texts: 
-            text.draw_word()
+            text.draw()
             if GAME_LEVEL==3:
                 speed=randint(10,40)
             else :
                 speed = TEXT_SPEED
-            text.move_y(speed) 
-            if text.is_screen_out(): #텍스트가 내려가다가 설정한 밑바닥에 닿으면 목숨 - 1
+            text.moveY(speed) 
+            if text.isScreenOut(): #텍스트가 내려가다가 설정한 밑바닥에 닿으면 목숨 - 1
                 screen_in_texts.remove(text) 
                 lifes.pop()
                 # 게임 종료되었을때 GAME_OVER 화면에 출력
